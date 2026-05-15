@@ -1,0 +1,37 @@
+name: Task
+description:
+  A general unit of work, not necessarily tied to a piece of user value. 
+title: "[TASK] ENTER TITLE HERE"
+type: "Task"
+body:
+  - type: input
+    id: what
+    attributes:
+      label: "We should:"
+      description: Overview of the work to be done.
+      placeholder: 
+    validations:
+      required: false
+  - type: input
+    id: why
+    attributes:
+      label: "So that:"
+      description: Why we need to do this work.
+      placeholder: 
+    validations:
+      required: false
+  - type: input
+    id: define-done
+    attributes:
+      label: "We will be done when:"
+      description: What needs to be completed before this task can be considered "Done"?
+      placeholder: 
+    validations:
+      required: false
+  - type: textarea
+    id: additional-details
+    attributes:
+      label: Additional Details
+      description: Any other details to add?
+    validations:
+      required: false

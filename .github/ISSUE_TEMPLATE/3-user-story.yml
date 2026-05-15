@@ -1,0 +1,35 @@
+name: User Story
+description:
+  A piece of work that will deliver our users some value.
+title: "[STORY] ENTER TITLE HERE"
+type: "User Story"
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: User Story
+      description: What does this item allow a user to do?
+      placeholder: |
+        As a ...
+        I want to ...
+        So that ...
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: 
+      placeholder: |
+        GIVEN ...
+        WHEN ...
+        THEN ...
+    validations:
+      required: false
+  - type: textarea
+    id: additional-details
+    attributes:
+      label: Additional Details
+      description: Any other details to add?
+    validations:
+      required: false

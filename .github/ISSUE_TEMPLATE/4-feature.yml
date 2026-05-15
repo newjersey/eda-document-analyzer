@@ -1,0 +1,27 @@
+name: Feature
+description:
+  A larger group of work that is oriented towards a broader goal of functionality. 
+title: "[FEATURE] ENTER TITLE HERE"
+type: "Feature"
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What does this feature allow your users to do? 
+    validations:
+      required: false
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact Summary
+      description: What are the intended outcomes of these feature? What metrics will you track to measure impact?
+    validations:
+      required: false
+  - type: textarea
+    id: documentation
+    attributes:
+      label: Links to Documentation
+      description: Link any product requirements documents, research insights, design files, technical design documents, or other supporting materials.
+    validations:
+      required: false

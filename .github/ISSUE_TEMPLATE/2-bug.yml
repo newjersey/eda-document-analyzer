@@ -1,0 +1,34 @@
+name: Bug
+description: Unexpected or incorrect behavior that needs fixing.
+title: "[BUG] ENTER TITLE HERE"
+type: "Bug"
+body:
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How can the issue be reproduced? Describe it step-by-step.
+    validations:
+      required: false
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Outcomes
+      description: What is the intended behavior?
+    validations:
+      required: false
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Outcomes
+      description: What is the unexpected or incorrect behavior currently happening?
+    validations:
+      required: false
+  - type: textarea
+    id: additional-details
+    attributes:
+      label: Additional Details
+      description: Overview of the severity of the issue and its impact on users / the service overall.
+    validations:
+      required: false
+
