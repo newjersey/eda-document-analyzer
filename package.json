@@ -1,0 +1,23 @@
+{
+  "name": "eda-document-analyzer",
+  "version": "0.1.0",
+  "private": false,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "dev-no-turbo": "next dev",
+    "build": "next build",
+    "build:static": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^16.2.6",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
+    "typescript": "6.0.3"
+  }
+}
