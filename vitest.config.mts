@@ -7,6 +7,10 @@ export default defineConfig({
     tsconfigPaths: true,
   },
   test: {
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json-summary", "json"],
+    },
     exclude: [
       "**/node_modules/**",
       "**/dist/**",
