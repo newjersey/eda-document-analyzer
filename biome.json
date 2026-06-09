@@ -2,9 +2,9 @@
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
     "includes": [
-      "app/",
-      "e2e/",
-      "__tests__",
+      "app/**",
+      "e2e/**",
+      "__tests__/**",
       "!**/.yarn/*",
       "!package-lock.json",
       "!pnpm-lock.yaml",
