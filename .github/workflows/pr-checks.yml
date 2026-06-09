@@ -71,15 +71,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify install
-        run: |
-          echo "=== node_modules/.bin/next ==="
-          ls node_modules/.bin/next || echo "MISSING"
-          echo "=== node_modules/react/package.json ==="
-          cat node_modules/react/package.json | grep '"version"' || echo "MISSING"
-          echo "=== npm ls next react ==="
-          npm ls next react --depth=0 2>&1
-
       # Run Vitest with coverage enabled.
       # Your vitest.config.ts should include at minimum:
       #
@@ -133,15 +124,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Verify install
-        run: |
-          echo "=== node_modules/.bin/next ==="
-          ls node_modules/.bin/next || echo "MISSING"
-          echo "=== node_modules/react/package.json ==="
-          cat node_modules/react/package.json | grep '"version"' || echo "MISSING"
-          echo "=== npm ls next react ==="
-          npm ls next react --depth=0 2>&1
 
       # Install Playwright's browser binaries + OS-level dependencies.
       # Remove browsers you don't need to speed up the job.
