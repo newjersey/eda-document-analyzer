@@ -13,6 +13,10 @@ You can clone this repo to create your own `[project]-pm` repository, with these
 
 If you are interested in adding an additional template for everyone's use, or have suggestions for improving the existing templates, reach out to Amani or feel free to submit a PR!
 
+## Development
+
+This repository uses [husky](https://typicode.github.io/husky/) to run git hook scripts. Currently this runs formatting using the [lint-staged](https://github.com/lint-staged/lint-staged) tool on the pre-commit hook.
+
 ## CI/CD
 
 This project runs the following processes via Github Actions:
