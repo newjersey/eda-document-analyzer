@@ -9,8 +9,14 @@
     "build:static": "next build",
     "start": "next start",
     "lint": "biome check",
-    "format": "biome format --write",
-    "test": "vitest"
+   "format": "biome format --write",
+    "test": "vitest",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
+      "biome check --files-ignore-unknown=true --no-errors-on-unmatched"
+    ]
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.0",
@@ -29,7 +35,9 @@
     "@types/react": "19.2.15",
     "@vitejs/plugin-react": "^6.0.2",
     "@vitest/coverage-v8": "^4.1.8",
+    "husky": "^9.1.7",
     "jsdom": "^29.1.1",
+    "lint-staged": "^17.0.7",
     "typescript": "6.0.3",
     "vitest": "^4.1.8"
   }
