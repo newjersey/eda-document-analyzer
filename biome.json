@@ -23,7 +23,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "complexity": {
         "noForEach": "error",
         "useArrowFunction": "error",
@@ -40,6 +40,7 @@
         "noCommonJs": "error",
         "noParameterAssign": "error",
         "useConst": "error",
+        "useErrorCause": "error",
         "useExportType": "error",
         "useImportType": "error",
         "useNodejsImportProtocol": "error",
@@ -50,12 +51,11 @@
         "noConsole": "error",
         "noExplicitAny": "error",
         "noImportCycles": "error",
+        "noNestedPromises": "error",
         "noVar": "error"
       },
       "nursery": {
-        "noFloatingPromises": "error",
-        "noNestedPromises": "error",
-        "useErrorCause": "error"
+        "noFloatingPromises": "error"
       }
     }
   },
