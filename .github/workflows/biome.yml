@@ -1,0 +1,37 @@
+name: biome
+
+on:
+  workflow_call:
+
+jobs:
+  biome:
+    name: Biome (lint + format) 
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+      - name: Install dependencies
+        run: npm ci
+
+      # biomejs/setup-biome installs the exact version declared in your
+      # package.json / biome.json. Pin to "latest" to always use the newest
+      # release, or pin to a semver string for reproducibility.
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+        with:
+          version: latest
+
+      # `biome ci` is the recommended command for CI:
+      #   • exits non-zero on any lint/format error
+      #   • emits GitHub annotations so errors appear inline in the PR diff
+      #   • never auto-fixes (safe for CI)
+      - name: Run Biome CI
+        run: biome ci .
+
+

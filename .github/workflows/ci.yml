@@ -1,0 +1,22 @@
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - "main"
+  push:
+    branches:
+      - "main"
+
+# Cancel any in-progress run for the same PR branch so pushes don't queue up.
+concurrency:
+  group: pr-checks-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  biome:
+    uses: ./.github/workflows/biome.yml
+  unit-tests:
+    uses: ./.github/workflows/unit_tests.yml
+  end-to-end-tests:
+    uses: ./.github/workflows/end_to_end_tests.yml
