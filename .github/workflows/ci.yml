@@ -18,5 +18,12 @@ jobs:
     uses: ./.github/workflows/biome.yml
   unit-tests:
     uses: ./.github/workflows/unit_tests.yml
+    permissions:
+      contents: read
+      pull-requests: write
   end-to-end-tests:
     uses: ./.github/workflows/end_to_end_tests.yml
+    permissions:
+      contents: read
+      pull-requests: write
+
