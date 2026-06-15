@@ -1,0 +1,57 @@
+name: unit-tests
+
+on:
+  workflow_call:
+
+jobs:
+  unit-tests:
+    name: Vitest (unit tests + coverage)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write  # needed to post the coverage comment
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Run Vitest with coverage enabled.
+      # Your vitest.config.ts should include at minimum:
+      #
+      #   coverage: {
+      #     provider: 'v8',          // or 'istanbul'
+      #     reporter: ['text', 'json-summary', 'json'],
+      #   }
+      #
+      # The `json-summary` reporter is required by vitest-coverage-report-action.
+      # The `json` reporter enables per-file coverage detail in the PR comment.
+      - name: Run tests with coverage
+        run: npx vitest run --coverage
+
+      # Upload the coverage directory so the reporting step can consume it.
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vitest-coverage
+          path: coverage/
+          retention-days: 7
+
+      # Post (or update) a coverage summary comment directly on the PR.
+      # Uses: https://github.com/davelosert/vitest-coverage-report-action
+      - name: Report coverage on PR
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          json-summary-path: coverage/coverage-summary.json
+          json-final-path: coverage/coverage-final.json
+
+

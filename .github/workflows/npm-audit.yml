@@ -1,0 +1,18 @@
+name: npm audit
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  npm-audit:
+    uses: newjersey/innovation-shared-actions/.github/workflows/npm-audit.yml@main
+    with:
+      node-version: ".nvmrc"
+      audit-level: "critical"
+

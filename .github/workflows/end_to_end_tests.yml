@@ -1,0 +1,64 @@
+name: end-to-end-tests
+
+on:
+  workflow_call:
+
+jobs:
+  end-to-end-tests:
+    name: Playwright (E2E tests + coverage)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # needed to post the test-result comment
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Install Playwright's browser binaries + OS-level dependencies.
+      # Remove browsers you don't need to speed up the job.
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      # Build the Next.js app before running e2e tests.
+      # Remove this step if your Playwright config handles the dev server itself
+      # via the `webServer` option (recommended for most setups).
+      - name: Build Next.js app
+        run: npm run build
+
+      # Run Playwright. The `json` reporter writes results.json which is
+      # consumed by the PR-comment action below.
+      # Your playwright.config.ts reporter array should include:
+      #   reporter: [['html'], ['json', { outputFile: 'results.json' }]]
+      - name: Run Playwright tests
+        run: npx playwright test --reporter=html,json
+        env:
+          # Ensure Playwright writes the JSON report to the project root.
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results.json
+
+      # Always upload the HTML report so you can inspect failures even when
+      # the job is marked red.
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+      # Post (or update) a pass/fail summary comment on the PR.
+      # Uses: https://github.com/daun/playwright-report-summary
+      - name: Post Playwright results to PR
+        if: always()
+        uses: daun/playwright-report-summary@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          report-file: results.json
