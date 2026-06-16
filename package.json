@@ -9,7 +9,7 @@
     "build:static": "next build",
     "start": "next start",
     "lint": "biome check",
-   "format": "biome format --write",
+    "format": "biome format --write",
     "test": "vitest",
     "prepare": "husky"
   },
@@ -24,7 +24,9 @@
     "postcss": "^8.5.15",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "tailwindcss": "^4.3.0"
+    "react-hot-toast": "^2.6.0",
+    "tailwindcss": "^4.3.0",
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.0",
