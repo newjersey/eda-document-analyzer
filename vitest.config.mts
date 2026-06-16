@@ -7,6 +7,7 @@ export default defineConfig({
     tsconfigPaths: true,
   },
   test: {
+    globals: true,
     coverage: {
       provider: "v8",
       reporter: ["text", "json-summary", "json"],
@@ -17,5 +18,6 @@ export default defineConfig({
       "**/e2e/**",
     ],
     environment: "jsdom",
+    setupFiles: ["./vitest.setup.ts"],
   },
 });
