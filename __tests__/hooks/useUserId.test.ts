@@ -1,5 +1,4 @@
 import { act, renderHook } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useUserId } from "../../hooks/useUserId";
 
 const USER_ID_KEY = "documentValidatorUserId";
