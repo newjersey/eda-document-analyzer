@@ -46,11 +46,17 @@ interface SessionEndEventMetaData {
     activeTimeSeconds: number;
 }
 
+interface ContactEmailSubmittedMetaData {
+    hasEmail: boolean;
+}
+
 type EventMetaData = TabHiddenEventMetaData
 | TabVisibleEventMetaData
 | StartValidationEventMetaData
 | ValidationCompletedEventMetaData
-| SessionEndEventMetaData;
+| SessionEndEventMetaData
+| ContactEmailSubmittedMetaData
+| {};
 
 // ---------------------------------------------------------------------------
 // Validation types
