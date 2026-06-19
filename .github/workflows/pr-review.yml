@@ -10,13 +10,13 @@ jobs:
   pr-review:
     if: contains(github.event.pull_request.labels.*.name, "pr-review")
     uses: newjersey/innovation-shared-actions/.github/workflows/pickaroo.yml@main
-    secrets: inherit
-    permissions: {}
+    secrets: inherit # used because the above workflow accesses org secrets
+    permissions: {} # not using the default GITHUB_TOKEN
     with:
       include_teams: ""
       exclude_users: ""
-      extras: true # default, set to false if you don"t want to pick an extra reviewer per subsequent run
-      channel_id: C03C7NHK9B4 # engineering-all
+      extras: true # default, picks an extra reviewer per subsequent run
+      channel_id: "C03C7NHK9B4" # resx-eng
       slack_as_author: false # default, set to true to notify as the PR author in slack
   pr-show:
     if: contains(github.event.pull_request.labels.*.name, "pr-show")
@@ -25,5 +25,5 @@ jobs:
     permissions: {}
     with:
       show: true
-      channel_id: C03C7NHK9B4 # resx-eng
-      slack_as_author: false # default, set to true to notify as the PR author in slack
+      channel_id: "C03C7NHK9B4" # resx-eng
+      slack_as_author: false
