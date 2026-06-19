@@ -8,7 +8,7 @@ on:
 
 jobs:
   pr-review:
-    if: contains(github.event.pull_request.labels.*.name, "pr-review")
+    if: contains(github.event.pull_request.labels.*.name, 'pr-review')
     uses: newjersey/innovation-shared-actions/.github/workflows/pickaroo.yml@main
     secrets: inherit # used because the above workflow accesses org secrets
     permissions: {} # not using the default GITHUB_TOKEN
@@ -19,7 +19,7 @@ jobs:
       channel_id: "C03C7NHK9B4" # resx-eng
       slack_as_author: false # default, set to true to notify as the PR author in slack
   pr-show:
-    if: contains(github.event.pull_request.labels.*.name, "pr-show")
+    if: contains(github.event.pull_request.labels.*.name, 'pr-show')
     uses: newjersey/innovation-shared-actions/.github/workflows/pickaroo.yml@main
     secrets: inherit
     permissions: {}
