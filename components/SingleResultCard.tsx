@@ -19,7 +19,7 @@ interface SingleResultCardProps {
     isDarkMode: boolean;
     userId: string;
     feedbackApiKey: string;
-    onOpenPreviewModal: (document: ValidatedDocument) => void;
+    onOpenPreviewModal?: (document: ValidatedDocument) => void;
     isInPreviewModal: boolean;
     analytics: AnalyticsService;
 }

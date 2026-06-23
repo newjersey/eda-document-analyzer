@@ -62,15 +62,25 @@ type EventMetaData = TabHiddenEventMetaData
 // Validation types
 // ---------------------------------------------------------------------------
 
-interface DocumentResult {
+export interface DocumentResult {
   error?: string;
   success?: boolean;
   passedChecks?: string[];
   missingElements?: string[];
+  message: string;
+  documentInfo: DocumentInfo;
+  suggestedActions: string[]
 }
 
-interface ValidatedDocument {
+interface DocumentInfo {
+    pageCount: number;
+    wordCount: number;
+    containsHandwriting: boolean;
+}
+
+export interface ValidatedDocument {
   file: File;
+  id: string;
   type: string;
   detectedCategory?: string;
   result?: DocumentResult;

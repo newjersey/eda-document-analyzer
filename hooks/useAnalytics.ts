@@ -10,15 +10,15 @@ import AnalyticsService from "../utils/analyticsService";
 /**
  * Hook to access analytics service
  * Initializes analytics on mount and cleans up on unmount
- * 
+ *
  * @param {string} userId - Anonymous user ID from localStorage
- * @returns {Object} Analytics service instance
- * 
+ * @returns {AnalyticsService} Analytics service instance
+ *
  * Usage:
  * const analytics = useAnalytics(userId);
  * analytics.logEvent(EVENTS.FILE_UPLOAD_LOCAL, { fileName: "test.pdf" });
  */
-export function useAnalytics(userId) {
+export function useAnalytics(userId: string): AnalyticsService {
     const [analytics, setAnalytics] = useState(null);
 
     useEffect(() => {
@@ -28,10 +28,10 @@ export function useAnalytics(userId) {
 
         // Create analytics instance
         const analyticsService = new AnalyticsService(userId);
-        
+
         // Initialize analytics (creates session, sets up listeners)
         analyticsService.initialize();
-        
+
         // Set analytics state (triggers re-render with analytics available)
         setAnalytics(analyticsService);
 
