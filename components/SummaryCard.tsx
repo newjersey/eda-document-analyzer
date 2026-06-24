@@ -7,10 +7,10 @@
  * NOTE: Errors are now shown as toast notifications instead of in the summary.
  */
 import { Check, X } from "lucide-react";
-import { Document } from "../utils/emailGenerator";
+import { ValidatedDocument } from "../utils/analyticsService";
 
 interface SummaryCardProps {
-    documentsWithResults: Document[];
+    documentsWithResults: ValidatedDocument[];
     isDarkMode: boolean;
 }
 

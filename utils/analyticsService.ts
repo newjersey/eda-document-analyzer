@@ -63,6 +63,7 @@ type EventMetaData = TabHiddenEventMetaData
 // ---------------------------------------------------------------------------
 
 export interface DocumentResult {
+  organizationNameMatches?: boolean;
   error?: string;
   success?: boolean;
   passedChecks?: string[];
@@ -76,6 +77,8 @@ interface DocumentInfo {
     pageCount: number;
     wordCount: number;
     containsHandwriting: boolean;
+    detectedOrganizationName: boolean;
+    documentType: string;
 }
 
 export interface ValidatedDocument {
@@ -84,6 +87,7 @@ export interface ValidatedDocument {
   type: string;
   detectedCategory?: string;
   result?: DocumentResult;
+  projectNumber?: string;
 }
 
 interface FormFields {

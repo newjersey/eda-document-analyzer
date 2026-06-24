@@ -6,12 +6,11 @@ import { useState } from "react";
 // Document type auto-detection
 import { getAvailableDocumentTypes } from "../utils/documentTypeDetector";
 import GuidanceContent from "./GuidanceContent";
-import AnalyticsService from "../utils/analyticsService";
-import { Document } from "../utils/emailGenerator";
+import AnalyticsService, { ValidatedDocument } from "../utils/analyticsService";
 import toast from "react-hot-toast";
 
 interface FileUploadAreaProps {
-    documents: Document[];
+    documents: ValidatedDocument[];
     handleDocumentTypeChange: (documentId: string, newType: string) => void;
     removeDocument: (id: string) => void;
     isDragOver: boolean;
@@ -21,7 +20,7 @@ interface FileUploadAreaProps {
     handleDragOver: (event: React.DragEvent<HTMLDivElement>) => void;
     handleDrop: (event: React.DragEvent<HTMLDivElement>) => void;
     isDarkMode: boolean;
-    handleDocumentPreview: (document: Document) => void;
+    handleDocumentPreview: (document: ValidatedDocument) => void;
     analytics :AnalyticsService;
 }
 

@@ -1,6 +1,7 @@
 // Email generator utility for creating applicant-facing email templates
 // Converts validation results into formatted email text using the NJEDA template
 
+import { ValidatedDocument } from "./analyticsService";
 import { convertToApplicantMessages } from "./messageMappings";
 
 /**
@@ -50,27 +51,29 @@ interface Detection {
 }
 
 interface Result {
+  organizationNameMatches: boolean;
   error: string;
   success: boolean;
   message: string;
   missingElements: string[];
+  documentInfo
 }
 
-export interface Document {
-  file: File,
-  id: string;
-  result: Result | null,
-  type: Detection["autoSelectedType"],
-  detectedCategory: Detection["detectedCategory"],
-  projectNumber: number;
-}
+// export interface Document {
+//   file: File,
+//   id: string;
+//   result: Result | null,
+//   type: Detection["autoSelectedType"],
+//   detectedCategory: Detection["detectedCategory"],
+//   projectNumber: number;
+// }
 
 /**
  * Gets a friendly display name for a document type
  * @param {string} documentType - The internal document type identifier
  * @returns {string} The user-friendly display name
  */
-function getDocumentTypeName(documentType: Document["type"]): string {
+function getDocumentTypeName(documentType: ValidatedDocument["type"]): string {
   return DOCUMENT_TYPE_NAMES[documentType] || documentType;
 }
 
@@ -79,7 +82,7 @@ function getDocumentTypeName(documentType: Document["type"]): string {
  * @param {Object} document - Document object with validation results
  * @returns {string} Formatted issues text for this document
  */
-function formatDocumentIssues(document: Document): string {
+function formatDocumentIssues(document: ValidatedDocument): string {
   if (!document.result || document.result.success === true || !document.result.missingElements) {
     return null; // No issues to report
   }
@@ -111,7 +114,7 @@ function formatDocumentIssues(document: Document): string {
  * @param {string} projectNumber - Optional project number (e.g., "00187261")
  * @returns {string} Complete email text with all failed documents
  */
-export function generateEmailForAllDocuments(documents: Document[], projectNumber: string = null): string {
+export function generateEmailForAllDocuments(documents: ValidatedDocument[], projectNumber: string = null): string {
   // Filter to only failed documents
   const failedDocuments = documents.filter(doc =>
     doc.result &&
@@ -154,7 +157,7 @@ export function generateEmailForAllDocuments(documents: Document[], projectNumbe
  * @param {Array} documents - Array of document objects
  * @returns {string|null} Project number if found, null otherwise
  */
-export function extractProjectNumber(documents: Document[]): (Document["projectNumber"] | null) {
+export function extractProjectNumber(documents: ValidatedDocument[]): (ValidatedDocument["projectNumber"] | null) {
   for (const doc of documents) {
     if (doc.projectNumber) {
       return doc.projectNumber;

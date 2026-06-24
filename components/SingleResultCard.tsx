@@ -20,7 +20,7 @@ interface SingleResultCardProps {
     userId: string;
     feedbackApiKey: string;
     onOpenPreviewModal?: (document: ValidatedDocument) => void;
-    isInPreviewModal: boolean;
+    isInPreviewModal?: boolean;
     analytics: AnalyticsService;
 }
 
