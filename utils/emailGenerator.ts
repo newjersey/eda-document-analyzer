@@ -44,13 +44,6 @@ const DOCUMENT_TYPE_NAMES = {
   "cert-authority": "Certificate of Authority"
 };
 
-interface File {
-  name: string;
-  size: number;
-  type: string;
-  projectNumber: string;
-}
-
 interface Detection {
   autoSelectedType: string;
   detectedCategory: string;
@@ -63,7 +56,7 @@ interface Result {
   missingElements: string[];
 }
 
-interface Document {
+export interface Document {
   file: File,
   id: string;
   result: Result | null,

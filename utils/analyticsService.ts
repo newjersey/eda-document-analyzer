@@ -91,7 +91,7 @@ interface FormFields {
   fein?: string;
 }
 
-interface DocumentDetail {
+export interface DocumentDetail {
   fileName: string;
   documentType: string;
   detectedCategory: string | null;
