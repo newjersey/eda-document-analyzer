@@ -1,0 +1,29 @@
+# This workflow will auto-pick reviewers to assign to a PR when a "pr-review" label is applied
+# Read the docs: https://newjersey.github.io/innovation-engineering/guides/github-actions/action-pickaroo/
+name: Pickaroo Reviewers
+
+on:
+  pull_request:
+    types: ["labeled"]
+
+jobs:
+  pr-review:
+    if: ${{ github.event.label.name == 'pr-review' }}
+    uses: newjersey/innovation-shared-actions/.github/workflows/pickaroo.yml@main
+    secrets: inherit # used because the above workflow accesses org secrets
+    permissions: {} # not using the default GITHUB_TOKEN
+    with:
+      include_users: "curt-mitch-gov alekvuka"
+      extras: true # default, picks an extra reviewer per subsequent run
+      number_of_reviewers: 1 # should always pick the other member of the team
+      channel_id: "C0590CD1EE8" # resx-eng
+      slack_as_author: false # default, set to true to notify as the PR author in slack
+  pr-show:
+    if: ${{ github.event.label.name == 'pr-show' }}
+    uses: newjersey/innovation-shared-actions/.github/workflows/pickaroo.yml@main
+    secrets: inherit
+    permissions: {}
+    with:
+      show: true
+      channel_id: "C0590CD1EE8" # resx-eng
+      slack_as_author: false
