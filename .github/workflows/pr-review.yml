@@ -8,22 +8,22 @@ on:
 
 jobs:
   pr-review:
-    if: contains(github.event.pull_request.labels.*.name, 'pr-review')
+    if: ${{ github.event.label.name == 'pr-review' }}
     uses: newjersey/innovation-shared-actions/.github/workflows/pickaroo.yml@main
     secrets: inherit # used because the above workflow accesses org secrets
     permissions: {} # not using the default GITHUB_TOKEN
     with:
-      include_teams: ""
-      exclude_users: ""
+      include_users: "curt-mitch-gov alekvuka"
       extras: true # default, picks an extra reviewer per subsequent run
-      channel_id: "C03C7NHK9B4" # resx-eng
+      number_of_reviewers: 1 # should always pick the other member of the team
+      channel_id: "C0590CD1EE8" # resx-eng
       slack_as_author: false # default, set to true to notify as the PR author in slack
   pr-show:
-    if: contains(github.event.pull_request.labels.*.name, 'pr-show')
+    if: ${{ github.event.label.name == 'pr-show' }}
     uses: newjersey/innovation-shared-actions/.github/workflows/pickaroo.yml@main
     secrets: inherit
     permissions: {}
     with:
       show: true
-      channel_id: "C03C7NHK9B4" # resx-eng
+      channel_id: "C0590CD1EE8" # resx-eng
       slack_as_author: false
