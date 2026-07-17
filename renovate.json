@@ -1,6 +1,32 @@
+// Based on Renovate configuration for NJIA projects.
+// General documentation: https://docs.renovatebot.com/configuration-options/
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ]
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+
+  // Base presets:
+  // - config:recommended — Renovate's recommended defaults (includes dependency dashboard)
+  // - :semanticCommits — uses fix:/chore: prefixes (matches our conventional commits)
+  // - :pinVersions — locks to exact versions for reproducible installs
+  // - group:allNonMajor — bundles minor + patch updates into a single PR
+  extends: ["config:recommended", ":semanticCommits", ":pinVersions", "group:allNonMajor"],
+
+  // Labels applied to every Renovate PR for easy filtering.
+  labels: ["dependencies", "renovate"],
+
+  // Limit concurrent PRs to avoid overwhelming reviewers.
+  prConcurrentLimit: 5,
+
+  // Run outside business hours to minimize disruption.
+  schedule: ["after 8pm and before 8am on weekdays", "every weekend"],
+
+  packageRules: [
+    {
+      // Automerge minor and patch updates for devDependencies.
+      // These are tooling-only (biome, husky, lint-staged) and low-risk.
+      // CI must pass before merge — Renovate respects branch protection rules.
+      matchDepTypes: ["devDependencies"],
+      matchUpdateTypes: ["minor", "patch"],
+      automerge: true,
+    },
+  ],
 }
