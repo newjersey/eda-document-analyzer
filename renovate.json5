@@ -18,7 +18,7 @@
 
   // Run outside business hours to minimize disruption.
   description: "Schedule after 8pm, before 8am on weekdays, and anytime on weekends",
-  schedule: ["* 20-23,0-8 * * *", "* * * * 0,6"]
+  schedule: ["* 20-23,0-8 * * *", "* * * * 0,6"],
 
   packageRules: [
     {
