@@ -17,7 +17,8 @@
   prConcurrentLimit: 5,
 
   // Run outside business hours to minimize disruption.
-  schedule: ["after 8pm and before 8am on weekdays", "every weekend"],
+  description: "Schedule after 8pm, before 8am on weekdays, and anytime on weekends",
+  schedule: ["* 20-23,0-8 * * *", "* * * * 0,6"]
 
   packageRules: [
     {
