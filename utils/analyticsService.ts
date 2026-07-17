@@ -405,7 +405,7 @@ class AnalyticsService {
      * @param {string} eventName - Name of the event
      * @param {Object} eventData - Event metadata
      */
-    async logEvent(eventName: string, eventData?: EventMetaData) {
+    async logEvent(eventName: string, eventData?: EventMetaData): Promise<void> {
         // Find event definition from EVENTS registry
         const event = Object.values(EVENTS).find(e => e.name === eventName);
 

@@ -59,15 +59,6 @@ interface Result {
   documentInfo
 }
 
-// export interface Document {
-//   file: File,
-//   id: string;
-//   result: Result | null,
-//   type: Detection["autoSelectedType"],
-//   detectedCategory: Detection["detectedCategory"],
-//   projectNumber: number;
-// }
-
 /**
  * Gets a friendly display name for a document type
  * @param {string} documentType - The internal document type identifier
