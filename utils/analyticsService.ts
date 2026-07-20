@@ -303,6 +303,10 @@ class AnalyticsService {
         }
     }
 
+    getSessionId() {
+        return this.sessionId;
+    }
+
     /**
      * Handle page unload (tab close or navigation away)
      * Ends the session gracefully

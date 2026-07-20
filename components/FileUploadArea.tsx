@@ -5,12 +5,14 @@ import { useState } from "react";
 
 // Document type auto-detection
 import { getAvailableDocumentTypes } from "../utils/documentTypeDetector";
+import { DocumentType } from "../utils/documentTypeDetector";
 import GuidanceContent from "./GuidanceContent";
 import AnalyticsService, { ValidatedDocument } from "../utils/analyticsService";
 import toast from "react-hot-toast";
 
 interface FileUploadAreaProps {
     documents: ValidatedDocument[];
+    documentTypes: DocumentType[];
     handleDocumentTypeChange: (documentId: string, newType: string) => void;
     removeDocument: (id: string) => void;
     isDragOver: boolean;
@@ -26,6 +28,7 @@ interface FileUploadAreaProps {
 
 export default function FileUploadArea({
   documents,
+  documentTypes,
   handleDocumentTypeChange,
   removeDocument,
   isDragOver,
@@ -131,7 +134,7 @@ export default function FileUploadArea({
       .then(res => res.blob())
       .then(blob => {
         const file = new File([blob], `Sample - ${sampleInfo.label}.pdf`, { type: "application/pdf" });
-        const sampleDoc = {
+        const sampleDoc: ValidatedDocument = {
           file: file,
           id: `sample-${sampleInfo.type}`,
           result: null,

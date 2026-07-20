@@ -6,7 +6,7 @@ import AnalyticsService from "../utils/analyticsService";
 interface ContactFormProps {
   userId: string;
   sessionId: string;
-  analytics: AnalyticsService;
+  analytics?: AnalyticsService;
 }
 
 // Revised Logic: Accept sessionId as a prop

@@ -386,6 +386,20 @@ describe("AnalyticsService", () => {
   });
 
   // -------------------------------------------------------------------------
+  // getSessionId()
+  // -------------------------------------------------------------------------
+  describe("getSessionId()", () => {
+    it("returns a valid UUIDv4 as the sessionId", async () => {
+      const service = createService();
+      const sessionId = service.getSessionId();
+      // Regex for UUID v4
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+      expect(sessionId).toMatch(uuidRegex);
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // handleBeforeUnload()
   // -------------------------------------------------------------------------
   describe("handleBeforeUnload()", () => {
