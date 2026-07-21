@@ -11,26 +11,23 @@ import ValidationButton from './ValidationButton';
 import ErrorMessage from './ErrorMessage';
 import ValidationResults from './ValidationResults';
 import { ContactForm } from './ContactForm';
-
-// --- Document type auto-detection ---
 import { detectDocumentType } from '../utils/documentTypeDetector';
-// === NEW ANALYTICS IMPORTS - START ===
 import { useAnalytics } from '../hooks/useAnalytics';
-import { EVENTS } from '../utils/analyticsEvents';
 import EmailPreviewModal from './EmailPreviewModal';
 import DocumentPreviewModal from './DocumentPreviewModal';
-import { ValidatedDocument } from '../utils/analyticsService';
-// === NEW ANALYTICS IMPORTS - END ===
+import { DocumentResult, ValidatedDocument } from '../utils/analyticsService';
+import { validateFile } from '../utils/fileValidation';
+import { fileToBase64 } from '../utils/fileEncoding';
+import { computeRequiredFields } from '../utils/requiredFields';
+import { useTheme } from '../hooks/useTheme';
+
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
-
 const FEEDBACK_API_KEY = process.env.NEXT_PUBLIC_FEEDBACK_API_KEY;
-const ANALYTICS_API_KEY = process.env.NEXT_PUBLIC_ANALYTICS_API_KEY;
-
 
 export default function DocumentValidator() {
-    const [documents, setDocuments] = useState([]);
+    const [documents, setDocuments] = useState<ValidatedDocument[]>([]);
     const [isUploading, setIsUploading] = useState(false);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
     const [formFields, setFormFields] = useState({
         organizationName: '',
         fein: ''
@@ -45,44 +42,16 @@ export default function DocumentValidator() {
     });
     const [isDragOver, setIsDragOver] = useState(false);
     const [dragCounter, setDragCounter] = useState(0);
-    const [isDarkMode, setIsDarkMode] = useState(false);
 
-    // --- NEW: SharePoint search modal state ---
-    const [isSharePointModalOpen, setIsSharePointModalOpen] = useState(false);
-
-    // ===== CHANGE FOR EMAIL TEMPLATE FEATURE - START =====
     // Email preview modal state - managed at top level like SharePoint modal
     const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
     const [emailText, setEmailText] = useState('');
-    // ===== CHANGE FOR EMAIL TEMPLATE FEATURE - END =====
-    // --- START: Document preview feature - modal state ---
     const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
-    const [previewDocument, setPreviewDocument] = useState(null);
-// --- END: Document preview feature - modal state ---
+    const [previewDocument, setPreviewDocument] = useState<ValidatedDocument | null>(null);
 
     const userId = useUserId();
     const analytics = useAnalytics(userId);
-
-
-    useEffect(() => {
-        // === REMOVED: setSessionStartTime(Date.now()) - handled by analytics service ===
-
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            setIsDarkMode(savedTheme === 'dark');
-        } else {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            setIsDarkMode(prefersDark);
-        }
-    }, []);
-
-    useEffect(() => {
-        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-    }, [isDarkMode]);
-
-    const toggleTheme = () => {
-        setIsDarkMode(!isDarkMode);
-    };
+    const { isDarkMode, toggleTheme } = useTheme();
 
     const documentTypes = [
         { value: 'tax-clearance-online', label: 'Tax Clearance Certificate (Online)' },
@@ -99,53 +68,18 @@ export default function DocumentValidator() {
     ];
 
     useEffect(() => {
-        const newRequiredFields = {
-            organizationName: false,
-            fein: false
-        };
-        for (const doc of documents) {
-            switch (doc.type) {
-                case 'tax-clearance-online':
-                case 'tax-clearance-manual':
-                    newRequiredFields.organizationName = true;
-                    newRequiredFields.fein = true;
-                    break;
-                case 'operating-agreement':
-                case 'cert-formation':
-                case 'cert-formation-independent':
-                case 'cert-incorporation':
-                case 'cert-authority':
-                case 'cert-alternative-name':
-                    newRequiredFields.organizationName = true;
-                    break;
-                default:
-                    break;
-            }
-        }
+        const newRequiredFields = computeRequiredFields(documents);
         setRequiredFields(newRequiredFields);
     }, [documents]);
 
-    const handleFiles = (selectedFiles: FileList) => {
+    const handleFiles = (selectedFiles: FileList): void => {
         setError(null);
         const filesArray = Array.from(selectedFiles);
         const newDocuments: ValidatedDocument[] = [];
-        let localError = null;
+        let localError: string | null = null;
 
         for (const file of filesArray) {
-            const allowedTypes = ['application/pdf', 'text/plain', 'image/png', 'image/jpeg', 'image/jpg'];
-            const allowedExtensions = ['.pdf', '.txt', '.png', '.jpg', '.jpeg'];
-            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
-            const isValidType = allowedTypes.includes(file.type) || allowedExtensions.includes(fileExtension);
-
-            if (!isValidType) {
-                localError = 'Please select valid file types: PDF, TXT, PNG, JPG, or JPEG';
-                break;
-            }
-
-            if (file.size > 23 * 1024 * 1024) {
-                localError = `File "${file.name}" exceeds the 23 MB size limit.`;
-                break;
-            }
+            localError = validateFile(file);
 
             // Auto-detect document type from filename
             const detection = detectDocumentType(file.name);
@@ -222,7 +156,7 @@ export default function DocumentValidator() {
         }
     };
 
-    const handleDocumentTypeChange = (documentId, newType) => {
+    const handleDocumentTypeChange = (documentId: string, newType: string) => {
         setDocuments(prevDocs =>
             prevDocs.map(doc =>
                 doc.id === documentId ? { ...doc, type: newType } : doc
@@ -230,12 +164,12 @@ export default function DocumentValidator() {
         );
     };
 
-    const removeDocument = (id) => {
+    const removeDocument = (id: string) => {
         setDocuments(prevDocs => prevDocs.filter(doc => doc.id !== id));
     };
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
         setFormFields(prev => ({ ...prev, [name]: value }));
         if (fieldErrors[name]) {
             setFieldErrors(prev => ({ ...prev, [name]: '' }));
@@ -259,28 +193,13 @@ export default function DocumentValidator() {
         setFieldErrors(errors);
         return isValid;
     };
-    //======================
-    const fileToBase64 = (file: File) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-                const result = reader.result as string;
-                const base64 = result.split(',')[1];
-                resolve(base64);
-            };
-            reader.onerror = () => reject(reader.error);
-            reader.readAsDataURL(file);
-        });
-    };
-    //==========================================
-    // === REMOVED OLD logSessionAnalytics FUNCTION ===
-    // Replaced by analytics service which handles:
-    // - Session creation on page load
-    // - Event tracking for all user actions
-    // - Validation logging with detailed results
-    // - Tab visibility and engagement tracking
 
-    const validateDocuments = async () => {
+    interface ValidationError {
+        error: true;
+        message: string;
+    }
+    type ValidationOutcome = DocumentResult | ValidationError;
+    const validateDocuments = async (): Promise<void> => {
         if (documents.length === 0) {
             setError('Please upload at least one document');
             return;
@@ -299,37 +218,41 @@ export default function DocumentValidator() {
         setIsUploading(true);
         setError(null);
 
-        const validationPromises = documents.map(async (doc) => {
-            try {
-                const base64File = await fileToBase64(doc.file);
-                const payload = {
-                    file: base64File,
-                    documentType: doc.type,
-                    fileType: doc.file.type,
-                    fileName: doc.file.name,
-                    ...formFields
-                };
-                const response = await fetch(`${API_BASE_URL}/api/validate-document`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                });
+        const validationPromises: Promise<ValidationOutcome>[] = documents.map(
+            async (doc): Promise<ValidationOutcome> => {
+                try {
+                    const base64File = await fileToBase64(doc.file);
+                    const payload = {
+                        file: base64File,
+                        documentType: doc.type,
+                        fileType: doc.file.type,
+                        fileName: doc.file.name,
+                        ...formFields
+                    };
+                    const response = await fetch(`${API_BASE_URL}/api/validate-document`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                    });
 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => null);
-                    throw new Error(errorData?.error || `Error: ${response.statusText}`);
+                    if (!response.ok) {
+                        const errorData = await response
+                            .json()
+                            .catch(() => null) as { error?: string } | null;
+                        throw new Error(errorData?.error || `Error: ${response.statusText}`);
+                    }
+                    return (await response.json()) as DocumentResult;
+                } catch (err) {
+                    const message = err instanceof Error ? err.message : 'Failed to validate document';
+                    return { error: true, message };
                 }
-                return await response.json();
-            } catch (err) {
-                return { error: true, message: err.message || 'Failed to validate document' };
-            }
-        });
+            });
 
-        const results = await Promise.all(validationPromises);
+        const results: ValidationOutcome[] = await Promise.all(validationPromises);
 
-// Show toast notifications for any validation errors
+        // Show toast notifications for any validation errors
         results.forEach((result, index) => {
-            if (result.error) {
+            if ("error" in result) {
                 const fileName = documents[index].file.name;
                 toast.error(`Error validating "${fileName}": ${result.message}`, {
                     duration: 5000,
@@ -338,24 +261,18 @@ export default function DocumentValidator() {
             }
         });
 
-        setDocuments(prevDocs =>
-            prevDocs.map((doc, index) => ({
-                ...doc,
-                result: results[index]
-            }))
+        const validatedDocs: ValidatedDocument[] = documents.map((doc, index) => ({
+            ...doc,
+            result: results[index],
+        })
         );
 
-        // === NEW ANALYTICS TRACKING - START ===
-        // Track validation completion with detailed results
+        setDocuments(validatedDocs);
+
         if (analytics) {
             analytics.startValidation();
-            await analytics.logValidation(documents.map((doc, index) => ({
-                ...doc,
-                result: results[index]
-            })), formFields);
+            await analytics.logValidation(validatedDocs, formFields);
         }
-        // === NEW ANALYTICS TRACKING - END ===
-
         setIsUploading(false);
     };
 
@@ -366,19 +283,19 @@ export default function DocumentValidator() {
      *
      * @param {string} generatedEmailText - The formatted email template to display
      */
-    const handleOpenEmailModal = (generatedEmailText) => {
+    const handleOpenEmailModal = (generatedEmailText: string) => {
         setEmailText(generatedEmailText);
         setIsEmailModalOpen(true);
     };
     // ===== CHANGE FOR EMAIL TEMPLATE FEATURE - END =====
     // --- START: Document preview feature ---
-        /**
-        * Opens the document preview modal with the selected document
-        * Called from FileUploadArea (before validation) and SingleResultCard (after validation)
-        *
-        * @param {Object} document - The document object to preview
-    */
-    const handleDocumentPreview = (document) => {
+    /**
+    * Opens the document preview modal with the selected document
+    * Called from FileUploadArea (before validation) and SingleResultCard (after validation)
+    *
+    * @param {Object} document - The document object to preview
+*/
+    const handleDocumentPreview = (document: ValidatedDocument) => {
         setPreviewDocument(document);
         setIsPreviewModalOpen(true);
     };
@@ -392,17 +309,17 @@ export default function DocumentValidator() {
 
     return (
         <div className={`min-h-screen w-full transition-colors duration-300 ${isDarkMode
-                ? 'bg-gradient-to-br from-gray-900 via-slate-900 to-gray-800'
-                : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100'
+            ? 'bg-gradient-to-br from-gray-900 via-slate-900 to-gray-800'
+            : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100'
             }`}>
             <div className="w-full h-full flex flex-col px-6 py-6">
                 <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} onRefresh={handleRefresh} />
                 <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    {/* Left panel - Upload area - Changed from lg:col-span-7 (60%) to lg:col-span-5 (40%) */}
+                    {/* Left panel - Upload area */}
                     <div className="lg:col-span-5 flex flex-col min-h-0">
                         <div className={`${isDarkMode
-                                ? 'bg-gray-800/80 border-gray-700/20'
-                                : 'bg-white/80 border-white/20'
+                            ? 'bg-gray-800/80 border-gray-700/20'
+                            : 'bg-white/80 border-white/20'
                             } backdrop-blur-sm p-4 sm:p-5 md:p-5 rounded-2xl shadow-xl border transition-all duration-300 h-full overflow-auto`}>
 
                             <FileUploadArea
@@ -443,11 +360,11 @@ export default function DocumentValidator() {
                         </div>
                     </div>
 
-                    {/* Right panel - Validation results - Changed from lg:col-span-5 (40%) to lg:col-span-7 (60%) */}
+                    {/* Right panel - Validation results */}
                     <div className="lg:col-span-7 flex flex-col min-h-0">
                         <div className={`${isDarkMode
-                                ? 'bg-gray-800/80 border-gray-700/20'
-                                : 'bg-white/80 border-white/20'
+                            ? 'bg-gray-800/80 border-gray-700/20'
+                            : 'bg-white/80 border-white/20'
                             } backdrop-blur-sm p-6 rounded-2xl shadow-xl border transition-all duration-300 h-full overflow-auto`}>
                             <ValidationResults
                                 documents={documents}
