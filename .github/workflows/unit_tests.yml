@@ -12,10 +12,10 @@ jobs:
       pull-requests: write  # needed to post the coverage comment
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v6.5.0
         with:
           node-version-file: ".nvmrc"
 
@@ -38,7 +38,7 @@ jobs:
       # Upload the coverage directory so the reporting step can consume it.
       - name: Upload coverage artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: vitest-coverage
           path: coverage/
@@ -48,7 +48,7 @@ jobs:
       # Uses: https://github.com/davelosert/vitest-coverage-report-action
       - name: Report coverage on PR
         if: always()
-        uses: davelosert/vitest-coverage-report-action@v2
+        uses: davelosert/vitest-coverage-report-action@v2.12.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           json-summary-path: coverage/coverage-summary.json
