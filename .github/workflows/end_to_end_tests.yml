@@ -12,10 +12,10 @@ jobs:
       pull-requests: write # needed to post the test-result comment
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7.0.0
         with:
           node-version: lts/*
           cache: npm
@@ -48,7 +48,7 @@ jobs:
       # the job is marked red.
       - name: Upload Playwright HTML report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: playwright-report
           path: playwright-report/
@@ -58,7 +58,7 @@ jobs:
       # Uses: https://github.com/daun/playwright-report-summary
       - name: Post Playwright results to PR
         if: always()
-        uses: daun/playwright-report-summary@v4
+        uses: daun/playwright-report-summary@v4.1.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           report-file: results.json
