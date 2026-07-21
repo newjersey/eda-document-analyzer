@@ -1,10 +1,8 @@
-import AnalyticsService from "../../utils/analyticsService";
+import AnalyticsService, { type ValidatedDocument } from "../../utils/analyticsService";
 
 // ---------------------------------------------------------------------------
 // Module mocks
 // ---------------------------------------------------------------------------
-
-vi.mock("uuid", () => ({ v4: vi.fn(() => "mock-session-uuid") }));
 
 vi.mock("../../utils/analyticsEvents", () => ({
   EVENTS: {
@@ -126,7 +124,7 @@ describe("AnalyticsService", () => {
       await service.initialize();
       const body = JSON.parse(mockFetch.mock.calls[0][1].body);
       expect(body.userId).toBe("user-abc");
-      expect(body.sessionId).toBe("mock-session-uuid");
+      expect(body.sessionId).toEqual(service.getSessionId());
     });
 
     it("tracks a PAGE_LOAD event after session creation", async () => {
@@ -302,7 +300,7 @@ describe("AnalyticsService", () => {
         type: "receipt",
         result: { error: "Parse error" },
       },
-    ];
+    ] as ValidatedDocument[];
 
     it("calls the log-validation endpoint", async () => {
       const service = await createInitializedService();
@@ -391,6 +389,7 @@ describe("AnalyticsService", () => {
   describe("getSessionId()", () => {
     it("returns a valid UUIDv4 as the sessionId", async () => {
       const service = createService();
+      await service.initialize();
       const sessionId = service.getSessionId();
       // Regex for UUID v4
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
