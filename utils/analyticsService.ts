@@ -64,13 +64,13 @@ type EventMetaData = TabHiddenEventMetaData
 
 export interface DocumentResult {
   organizationNameMatches?: boolean;
-  error?: string;
+  error?: string | boolean;
   success?: boolean;
   passedChecks?: string[];
   missingElements?: string[];
   message: string;
-  documentInfo: DocumentInfo;
-  suggestedActions: string[]
+  documentInfo?: DocumentInfo;
+  suggestedActions?: string[]
 }
 
 interface DocumentInfo {
