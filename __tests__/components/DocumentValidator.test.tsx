@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/a11y/useButtonType: <explanation> */
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DocumentValidator from "../../components/DocumentValidator";
@@ -46,8 +45,12 @@ vi.mock("../../utils/documentTypeDetector", () => ({
 vi.mock("../../components/Header", () => ({
   default: ({ toggleTheme, onRefresh }) => (
     <div>
-      <button onClick={toggleTheme}>toggle-theme</button>
-      <button onClick={onRefresh}>refresh</button>
+      <button onClick={toggleTheme} type="button">
+        toggle-theme
+      </button>
+      <button onClick={onRefresh} type="button">
+        refresh
+      </button>
     </div>
   ),
 }));
@@ -70,10 +73,12 @@ vi.mock("../../components/FileUploadArea", () => ({
         <div key={d.id} data-testid={`doc-${d.id}`}>
           <span>{d.file.name}</span>
           <span data-testid={`type-${d.id}`}>{d.type}</span>
-          <button onClick={() => handleDocumentTypeChange(d.id, "cert-formation")}>
+          <button onClick={() => handleDocumentTypeChange(d.id, "cert-formation")} type="button">
             set-type-{d.id}
           </button>
-          <button onClick={() => removeDocument(d.id)}>remove-{d.id}</button>
+          <button onClick={() => removeDocument(d.id)} type="button">
+            remove-{d.id}
+          </button>
         </div>
       ))}
     </div>
@@ -81,7 +86,7 @@ vi.mock("../../components/FileUploadArea", () => ({
 }));
 vi.mock("../../components/ValidationButton", () => ({
   default: ({ validateDocument, isUploading }) => (
-    <button onClick={validateDocument} disabled={isUploading}>
+    <button onClick={validateDocument} disabled={isUploading} type="button">
       {isUploading ? "validating" : "validate"}
     </button>
   ),
