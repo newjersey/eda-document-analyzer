@@ -231,14 +231,17 @@ describe("AnalyticsService", () => {
   // logEvent()
   // -------------------------------------------------------------------------
   describe("logEvent()", () => {
+    let service: AnalyticsService;
+    beforeEach(async () => {
+      service = await createInitializedService();
+    });
+
     it("resolves to the result of trackEvent for a known event name", async () => {
-      const service = await createInitializedService();
       mockFetch.mockResolvedValue({ ok: true } as Response);
       await expect(service.logEvent("page_load")).resolves.not.toThrow();
     });
 
     it("falls back to a custom category for an unknown event name", async () => {
-      const service = await createInitializedService();
       mockFetch.mockResolvedValue({ ok: true } as Response);
       await service.logEvent("unknown_custom_event");
       const body = JSON.parse(mockFetch.mock.calls[0][1].body);
@@ -250,15 +253,18 @@ describe("AnalyticsService", () => {
   // startValidation()
   // -------------------------------------------------------------------------
   describe("startValidation()", () => {
+    let service: AnalyticsService;
+    beforeEach(async () => {
+      service = await createInitializedService();
+    });
+
     it("returns a validation ID in the expected format", async () => {
-      const service = await createInitializedService();
       mockFetch.mockResolvedValue({ ok: true } as Response);
       const id = service.startValidation();
       expect(id).toMatch(/^val-\d{3}$/);
     });
 
     it("increments the validation counter on each call", async () => {
-      const service = await createInitializedService();
       mockFetch.mockResolvedValue({ ok: true } as Response);
       const first = service.startValidation();
       const second = service.startValidation();
@@ -267,7 +273,6 @@ describe("AnalyticsService", () => {
     });
 
     it("tracks a VALIDATION_STARTED event", async () => {
-      const service = await createInitializedService();
       mockFetch.mockResolvedValue({ ok: true } as Response);
       service.startValidation();
       await Promise.resolve();
@@ -402,8 +407,12 @@ describe("AnalyticsService", () => {
   // handleBeforeUnload()
   // -------------------------------------------------------------------------
   describe("handleBeforeUnload()", () => {
+    let service: AnalyticsService;
+    beforeEach(async () => {
+      service = await createInitializedService();
+    });
+
     it("calls navigator.sendBeacon with the end-session URL", async () => {
-      const service = await createInitializedService();
       service.handleBeforeUnload();
       expect(mockSendBeacon).toHaveBeenCalledWith(
         expect.stringContaining("/api/end-session"),
@@ -412,7 +421,6 @@ describe("AnalyticsService", () => {
     });
 
     it("includes endReason 'tab_closed' in the beacon payload", async () => {
-      const service = await createInitializedService();
       service.handleBeforeUnload();
       const blob: Blob = mockSendBeacon.mock.calls[0][1];
       const text = await blob.text();
@@ -491,8 +499,12 @@ describe("AnalyticsService", () => {
   // updateSessionEmail()
   // -------------------------------------------------------------------------
   describe("updateSessionEmail()", () => {
+    let service: AnalyticsService;
+    beforeEach(async () => {
+      service = await createInitializedService();
+    });
+
     it("calls the update-session endpoint with the provided email", async () => {
-      const service = await createInitializedService();
       mockFetch.mockResolvedValue({ ok: true } as Response);
       await service.updateSessionEmail("user@example.com");
       expect(mockFetch).toHaveBeenCalledWith(
@@ -504,7 +516,6 @@ describe("AnalyticsService", () => {
     });
 
     it("does not throw when the API returns a non-ok response", async () => {
-      const service = await createInitializedService();
       mockFetch.mockResolvedValue(makeErrorResponse());
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       await expect(service.updateSessionEmail("user@example.com")).resolves.not.toThrow();
@@ -512,7 +523,6 @@ describe("AnalyticsService", () => {
     });
 
     it("does not throw on a network failure", async () => {
-      const service = await createInitializedService();
       mockFetch.mockRejectedValueOnce(new Error("Network error"));
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       await expect(service.updateSessionEmail("user@example.com")).resolves.not.toThrow();

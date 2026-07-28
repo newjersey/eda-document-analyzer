@@ -337,18 +337,19 @@ describe("DocumentPreviewModal", () => {
   // Layout — document only (no validation result)
   // -------------------------------------------------------------------------
   describe("layout — document only", () => {
-    it("renders the DocumentViewer when result is null", () => {
+    beforeEach(() => {
       renderModal({ document: makeDocument({ result: null }) });
+    });
+
+    it("renders the DocumentViewer when result is null", () => {
       expect(screen.getByTestId("document-viewer")).toBeInTheDocument();
     });
 
     it("does not render the SingleResultCard when result is null", () => {
-      renderModal({ document: makeDocument({ result: null }) });
       expect(screen.queryByTestId("single-result-card-doc-001")).not.toBeInTheDocument();
     });
 
     it("does not render the Validation Result panel label when result is null", () => {
-      renderModal({ document: makeDocument({ result: null }) });
       expect(screen.queryByText("Validation Result")).not.toBeInTheDocument();
     });
   });
@@ -360,24 +361,23 @@ describe("DocumentPreviewModal", () => {
     const documentWithResult = makeDocument({
       result: { success: true, missingElements: [] },
     });
+    beforeEach(() => {
+      renderModal({ document: documentWithResult });
+    });
 
     it("renders the DocumentViewer in the side-by-side layout", () => {
-      renderModal({ document: documentWithResult });
       expect(screen.getByTestId("document-viewer")).toBeInTheDocument();
     });
 
     it("renders the SingleResultCard in the side-by-side layout", () => {
-      renderModal({ document: documentWithResult });
       expect(screen.getByTestId("single-result-card-doc-001")).toBeInTheDocument();
     });
 
     it("renders the Document panel label", () => {
-      renderModal({ document: documentWithResult });
       expect(screen.getByText("Document")).toBeInTheDocument();
     });
 
     it("renders the Validation Result panel label", () => {
-      renderModal({ document: documentWithResult });
       expect(screen.getByText("Validation Result")).toBeInTheDocument();
     });
   });

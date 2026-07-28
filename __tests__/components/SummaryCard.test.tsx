@@ -83,28 +83,27 @@ describe("SummaryCard", () => {
   // Rendering
   // -------------------------------------------------------------------------
   describe("rendering", () => {
-    it("renders the Validation Summary heading", () => {
+    beforeEach(() => {
       renderCard([makePassedDocument()]);
+    });
+
+    it("renders the Validation Summary heading", () => {
       expect(screen.getByText("Validation Summary")).toBeInTheDocument();
     });
 
     it("renders the Passed label", () => {
-      renderCard([makePassedDocument()]);
       expect(screen.getByText("Passed")).toBeInTheDocument();
     });
 
     it("renders the Failed label", () => {
-      renderCard([makePassedDocument()]);
       expect(screen.getByText("Failed")).toBeInTheDocument();
     });
 
     it("renders the Check icon", () => {
-      renderCard([makePassedDocument()]);
       expect(screen.getByTestId("icon-check")).toBeInTheDocument();
     });
 
     it("renders the X icon", () => {
-      renderCard([makePassedDocument()]);
       expect(screen.getByTestId("icon-x")).toBeInTheDocument();
     });
   });

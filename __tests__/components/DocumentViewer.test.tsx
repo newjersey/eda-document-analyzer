@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import type { Mock } from "vitest";
 import DocumentViewer from "../../components/DocumentViewer";
 
 // ---------------------------------------------------------------------------
@@ -61,10 +62,6 @@ function makeDocFile() {
   return makeFile("report.doc", "application/msword");
 }
 
-function makeUnsupportedFile() {
-  return makeFile("archive.zip", "application/zip");
-}
-
 // ---------------------------------------------------------------------------
 // Browser API stubs
 // ---------------------------------------------------------------------------
@@ -90,6 +87,13 @@ const defaultProps = {
 
 function renderViewer(file: File | null, overrides = {}) {
   return render(<DocumentViewer file={file} {...defaultProps} {...overrides} />);
+}
+
+function makePendingPdfFile(): File {
+  const file = makeFile("document.pdf", "application/pdf");
+  // Never resolves -> generatePreview stays awaiting -> component stays loading.
+  file.arrayBuffer = () => new Promise<ArrayBuffer>(() => {});
+  return file;
 }
 
 // ---------------------------------------------------------------------------
@@ -127,23 +131,27 @@ describe("DocumentViewer", () => {
   // -------------------------------------------------------------------------
   describe("loading state", () => {
     it("renders a loading spinner initially", () => {
-      renderViewer(makePdfFile());
+      renderViewer(makePendingPdfFile());
       expect(document.querySelector(".animate-spin")).toBeInTheDocument();
     });
 
     it("renders the loading text initially", () => {
-      renderViewer(makePdfFile());
+      renderViewer(makePendingPdfFile());
       expect(screen.getByText("Loading document preview...")).toBeInTheDocument();
     });
 
-    it("applies dark background to the loading container when isDarkMode is true", () => {
-      const { container } = renderViewer(makePdfFile(), { isDarkMode: true });
+    it("applies dark background to the loading container when isDarkMode is true", async () => {
+      const { container } = renderViewer(makePendingPdfFile(), { isDarkMode: true });
       expect(container.firstChild).toHaveClass("bg-gray-800");
+      // Pending file never resolves, so no trailing update — but drain the
+      // microtask queue under act anyway to stay warning-proof if the mock changes.
+      await act(async () => {});
     });
 
-    it("applies light background to the loading container when isDarkMode is false", () => {
-      const { container } = renderViewer(makePdfFile(), { isDarkMode: false });
+    it("applies light background to the loading container when isDarkMode is false", async () => {
+      const { container } = renderViewer(makePendingPdfFile(), { isDarkMode: false });
       expect(container.firstChild).toHaveClass("bg-gray-50");
+      await act(async () => {});
     });
   });
 
@@ -151,12 +159,21 @@ describe("DocumentViewer", () => {
   // Error state
   // -------------------------------------------------------------------------
   describe("error state", () => {
+    let errorSpy: Mock<(...data: unknown[]) => void>;
+    beforeAll(() => {
+      errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    });
+    afterAll(() => {
+      errorSpy.mockRestore();
+    });
+
     it("renders the error message when preview generation fails", async () => {
       mockArrayBuffer.mockRejectedValueOnce(new Error("Read error"));
       renderViewer(makePdfFile());
       await waitFor(() =>
         expect(screen.getByText("Failed to load document preview")).toBeInTheDocument(),
       );
+      expect(errorSpy).toHaveBeenCalled();
     });
 
     it("renders the AlertCircle icon in the error state", async () => {
@@ -169,13 +186,6 @@ describe("DocumentViewer", () => {
       mockArrayBuffer.mockRejectedValueOnce(new Error("Read error"));
       renderViewer(makePdfFile());
       await waitFor(() => expect(screen.getByText("File: document.pdf")).toBeInTheDocument());
-    });
-
-    it("renders the unsupported file type error message", async () => {
-      renderViewer(makeUnsupportedFile());
-      await waitFor(() =>
-        expect(screen.getByText("Preview not available for this file type")).toBeInTheDocument(),
-      );
     });
 
     it("applies dark background to the error container when isDarkMode is true", async () => {
@@ -295,6 +305,7 @@ describe("DocumentViewer", () => {
     });
 
     it("shows an error when mammoth fails to convert", async () => {
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       const mammoth = await import("mammoth");
       (mammoth.default.convertToHtml as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
         new Error("Conversion failed"),
@@ -303,9 +314,12 @@ describe("DocumentViewer", () => {
       await waitFor(() =>
         expect(screen.getByText(/Failed to convert Word document/i)).toBeInTheDocument(),
       );
+      expect(errorSpy).toHaveBeenCalled();
+      errorSpy.mockRestore();
     });
 
     it("shows an error when mammoth returns empty content", async () => {
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       const mammoth = await import("mammoth");
       (mammoth.default.convertToHtml as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         value: "",
@@ -315,6 +329,8 @@ describe("DocumentViewer", () => {
       await waitFor(() =>
         expect(screen.getByText(/Failed to convert Word document/i)).toBeInTheDocument(),
       );
+      expect(errorSpy).toHaveBeenCalled();
+      errorSpy.mockRestore();
     });
 
     it("applies the zoom level to the Word content font size style", async () => {

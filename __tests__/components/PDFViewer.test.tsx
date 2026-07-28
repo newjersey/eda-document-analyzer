@@ -42,6 +42,28 @@ function renderPDFViewer(overrides = {}) {
 // ---------------------------------------------------------------------------
 
 describe("PDFViewer", () => {
+  beforeAll(() => {
+    HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
+      // minimal 2D context surface PDF.js touches during render
+      fillRect: vi.fn(),
+      clearRect: vi.fn(),
+      getImageData: vi.fn(() => ({ data: new Uint8ClampedArray(0) })),
+      putImageData: vi.fn(),
+      createImageData: vi.fn(() => ({ data: new Uint8ClampedArray(0) })),
+      setTransform: vi.fn(),
+      drawImage: vi.fn(),
+      save: vi.fn(),
+      restore: vi.fn(),
+      scale: vi.fn(),
+      translate: vi.fn(),
+      fillText: vi.fn(),
+      beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      stroke: vi.fn(),
+      fill: vi.fn(),
+    })) as unknown as typeof HTMLCanvasElement.prototype.getContext;
+  });
   afterEach(() => {
     vi.clearAllMocks();
   });
@@ -50,21 +72,21 @@ describe("PDFViewer", () => {
   // Loading state
   // -------------------------------------------------------------------------
   describe("loading state", () => {
+    beforeEach(() => {
+      mockGetDocument.mockReturnValueOnce({ promise: new Promise(() => {}) });
+    });
     it("renders the loading spinner while the PDF is being loaded", () => {
       // Keep the promise pending so the loading state stays visible
-      mockGetDocument.mockReturnValueOnce({ promise: new Promise(() => {}) });
       renderPDFViewer();
       expect(document.querySelector(".animate-spin")).toBeInTheDocument();
     });
 
     it("applies dark background to the loading container when isDarkMode is true", () => {
-      mockGetDocument.mockReturnValueOnce({ promise: new Promise(() => {}) });
       const { container } = renderPDFViewer({ isDarkMode: true });
       expect(container.firstChild).toHaveClass("bg-gray-900");
     });
 
     it("applies light background to the loading container when isDarkMode is false", () => {
-      mockGetDocument.mockReturnValueOnce({ promise: new Promise(() => {}) });
       const { container } = renderPDFViewer({ isDarkMode: false });
       expect(container.firstChild).toHaveClass("bg-gray-100");
     });
@@ -74,10 +96,20 @@ describe("PDFViewer", () => {
   // Error state
   // -------------------------------------------------------------------------
   describe("error state", () => {
-    it("renders the error message when the PDF fails to load", async () => {
+    let errorSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       mockGetDocument.mockReturnValueOnce({
         promise: Promise.reject(new Error("Network error")),
       });
+    });
+
+    afterEach(() => {
+      errorSpy.mockRestore();
+    });
+
+    it("renders the error message when the PDF fails to load", async () => {
       renderPDFViewer();
       await waitFor(() =>
         expect(screen.getByText("Failed to load PDF document")).toBeInTheDocument(),
@@ -85,24 +117,16 @@ describe("PDFViewer", () => {
     });
 
     it("applies dark text class to the error message when isDarkMode is true", async () => {
-      mockGetDocument.mockReturnValueOnce({
-        promise: Promise.reject(new Error("Network error")),
-      });
       renderPDFViewer({ isDarkMode: true });
       await waitFor(() => {
-        const msg = screen.getByText("Failed to load PDF document");
-        expect(msg).toHaveClass("text-gray-300");
+        expect(screen.getByText("Failed to load PDF document")).toHaveClass("text-gray-300");
       });
     });
 
     it("applies light text class to the error message when isDarkMode is false", async () => {
-      mockGetDocument.mockReturnValueOnce({
-        promise: Promise.reject(new Error("Network error")),
-      });
       renderPDFViewer({ isDarkMode: false });
       await waitFor(() => {
-        const msg = screen.getByText("Failed to load PDF document");
-        expect(msg).toHaveClass("text-gray-600");
+        expect(screen.getByText("Failed to load PDF document")).toHaveClass("text-gray-600");
       });
     });
   });

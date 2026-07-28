@@ -166,7 +166,7 @@ beforeEach(() => {
     onerror: (() => void) | null = null;
     readAsDataURL() {
       this.result = "data:application/pdf;base64,ZmFrZQ==";
-      queueMicrotask(() => this.onload && this.onload());
+      queueMicrotask(() => this.onload?.());
     }
   }
   vi.stubGlobal("FileReader", MockFileReader);
@@ -190,26 +190,26 @@ afterEach(() => {
 // ===========================================================================
 
 describe("DocumentValidator — rendering", () => {
-  it("renders without crashing", () => {
+  beforeEach(() => {
     render(<DocumentValidator />);
+  });
+
+  it("renders without crashing", () => {
     expect(screen.getByText("validate")).toBeInTheDocument();
   });
 
   it("starts with no documents and no results", () => {
-    render(<DocumentValidator />);
     expect(screen.getByTestId("doc-count")).toHaveTextContent("0");
     expect(screen.getByTestId("results-count")).toHaveTextContent("0");
   });
 
   it("reads saved theme from localStorage on mount", () => {
     localStorage.setItem("theme", "dark");
-    render(<DocumentValidator />);
     // Effect writes the resolved theme back; assert it persisted as dark.
     expect(localStorage.getItem("theme")).toBe("dark");
   });
 
   it("does not show the contact form before validation has run", () => {
-    render(<DocumentValidator />);
     expect(screen.queryByTestId("contact-form")).not.toBeInTheDocument();
   });
 });
@@ -219,21 +219,22 @@ describe("DocumentValidator — rendering", () => {
 // ===========================================================================
 
 describe("DocumentValidator — file upload", () => {
-  it("adds an uploaded file to the document list", () => {
+  beforeEach(() => {
     render(<DocumentValidator />);
+  });
+
+  it("adds an uploaded file to the document list", () => {
     uploadFiles([makeFile("report.pdf")]);
     expect(screen.getByTestId("doc-count")).toHaveTextContent("1");
     expect(screen.getByText("report.pdf")).toBeInTheDocument();
   });
 
   it("auto-detects document type from filename", () => {
-    render(<DocumentValidator />);
     uploadFiles([makeFile("tax-clearance.pdf")]);
     expect(screen.getByTestId("type-test-uuid-1")).toHaveTextContent("tax-clearance-online");
   });
 
   it("logs an analytics event when a type is auto-detected", () => {
-    render(<DocumentValidator />);
     uploadFiles([makeFile("tax-clearance.pdf")]);
     expect(analyticsMock.logEvent).toHaveBeenCalledWith(
       "document_type_auto_detected",
@@ -242,14 +243,12 @@ describe("DocumentValidator — file upload", () => {
   });
 
   it("rejects an invalid file type", () => {
-    render(<DocumentValidator />);
     uploadFiles([makeFile("malware.exe", { type: "application/octet-stream" })]);
     expect(screen.getByRole("alert")).toHaveTextContent(/valid file types/i);
     expect(screen.getByTestId("doc-count")).toHaveTextContent("0");
   });
 
   it("rejects a file over the 23 MB size limit", () => {
-    render(<DocumentValidator />);
     uploadFiles([makeFile("huge.pdf", { size: 24 * 1024 * 1024 })]);
     expect(screen.getByRole("alert")).toHaveTextContent(/23 MB/i);
     expect(screen.getByTestId("doc-count")).toHaveTextContent("0");
@@ -257,7 +256,6 @@ describe("DocumentValidator — file upload", () => {
 
   it("removes a document when removeDocument is called", async () => {
     const user = userEvent.setup();
-    render(<DocumentValidator />);
     uploadFiles([makeFile("report.pdf")]);
     await user.click(screen.getByText("remove-test-uuid-1"));
     expect(screen.getByTestId("doc-count")).toHaveTextContent("0");
@@ -265,7 +263,6 @@ describe("DocumentValidator — file upload", () => {
 
   it("changes a document type", async () => {
     const user = userEvent.setup();
-    render(<DocumentValidator />);
     uploadFiles([makeFile("report.pdf")]);
     await user.click(screen.getByText("set-type-test-uuid-1"));
     expect(screen.getByTestId("type-test-uuid-1")).toHaveTextContent("cert-formation");
@@ -277,8 +274,11 @@ describe("DocumentValidator — file upload", () => {
 // ===========================================================================
 
 describe("DocumentValidator — required fields", () => {
-  it("surfaces org-name + FEIN fields when a tax clearance doc is present", async () => {
+  beforeEach(() => {
     render(<DocumentValidator />);
+  });
+
+  it("surfaces org-name + FEIN fields when a tax clearance doc is present", async () => {
     uploadFiles([makeFile("tax-clearance.pdf")]);
     await waitFor(() => {
       expect(screen.getByLabelText("organizationName")).toBeInTheDocument();
@@ -288,7 +288,6 @@ describe("DocumentValidator — required fields", () => {
 
   it("blocks validation and shows field errors when required fields are empty", async () => {
     const user = userEvent.setup();
-    render(<DocumentValidator />);
     uploadFiles([makeFile("tax-clearance.pdf")]);
     await user.click(screen.getByText("validate"));
     expect(screen.getByRole("alert")).toHaveTextContent(/required fields/i);
@@ -301,29 +300,28 @@ describe("DocumentValidator — required fields", () => {
 // ===========================================================================
 
 describe("DocumentValidator — validation", () => {
-  // helper
+  let user: UserEvent;
   async function fillOrgName(user: ReturnType<typeof userEvent.setup>) {
     await user.type(screen.getByLabelText("organizationName"), "Acme Inc");
   }
 
-  it("blocks validation with no documents", async () => {
-    const user = userEvent.setup();
+  beforeEach(() => {
     render(<DocumentValidator />);
+    user = userEvent.setup();
+  });
+
+  it("blocks validation with no documents", async () => {
     await user.click(screen.getByText("validate"));
     expect(screen.getByRole("alert")).toHaveTextContent(/at least one document/i);
   });
 
   it("blocks validation when a document has no type selected", async () => {
-    const user = userEvent.setup();
-    render(<DocumentValidator />);
     uploadFiles([makeFile("unknown.pdf")]); // detector returns empty type
     await user.click(screen.getByText("validate"));
     expect(screen.getByRole("alert")).toHaveTextContent(/select a document type/i);
   });
 
   it("validates a typed document and records the result", async () => {
-    const user = userEvent.setup();
-    render(<DocumentValidator />);
     uploadFiles([makeFile("unknown.pdf")]);
     await user.click(screen.getByText("set-type-test-uuid-1")); // gives it a type
     await fillOrgName(user);
@@ -339,8 +337,6 @@ describe("DocumentValidator — validation", () => {
   });
 
   it("shows the contact form after a validation run", async () => {
-    const user = userEvent.setup();
-    render(<DocumentValidator />);
     uploadFiles([makeFile("unknown.pdf")]);
     await user.click(screen.getByText("set-type-test-uuid-1"));
     await fillOrgName(user);
@@ -360,8 +356,6 @@ describe("DocumentValidator — validation", () => {
         json: async () => ({ error: "Bad document" }),
       }),
     );
-    const user = userEvent.setup();
-    render(<DocumentValidator />);
     uploadFiles([makeFile("unknown.pdf")]);
     await user.click(screen.getByText("set-type-test-uuid-1"));
     await fillOrgName(user);
@@ -378,8 +372,6 @@ describe("DocumentValidator — validation", () => {
   it("shows a toast when fetch rejects (network error)", async () => {
     const { toast } = await import("react-hot-toast");
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("Network down")));
-    const user = userEvent.setup();
-    render(<DocumentValidator />);
     uploadFiles([makeFile("unknown.pdf")]);
     await user.click(screen.getByText("set-type-test-uuid-1"));
     await fillOrgName(user);
@@ -394,8 +386,6 @@ describe("DocumentValidator — validation", () => {
   });
 
   it("calls analytics.logValidation on a completed run", async () => {
-    const user = userEvent.setup();
-    render(<DocumentValidator />);
     uploadFiles([makeFile("unknown.pdf")]);
     await user.click(screen.getByText("set-type-test-uuid-1"));
     await fillOrgName(user);

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Feedback from "../../components/Feedback";
 
@@ -83,45 +83,41 @@ describe("Feedback", () => {
   // Initial rendering
   // -------------------------------------------------------------------------
   describe("initial rendering", () => {
-    it("renders the 'Was this helpful?' prompt", () => {
+    beforeEach(() => {
       renderFeedback();
+    });
+
+    it("renders the 'Was this helpful?' prompt", () => {
       expect(screen.getByText("Was this helpful?")).toBeInTheDocument();
     });
 
     it("renders the thumbs up button", () => {
-      renderFeedback();
       expect(screen.getByTestId("icon-thumbs-up")).toBeInTheDocument();
     });
 
     it("renders the thumbs down button", () => {
-      renderFeedback();
       expect(screen.getByTestId("icon-thumbs-down")).toBeInTheDocument();
     });
 
     it("renders the reviewer notes textarea", () => {
-      renderFeedback();
       expect(screen.getByLabelText(/reviewer notes/i)).toBeInTheDocument();
     });
 
     it("renders the submit button", () => {
-      renderFeedback();
       expect(screen.getByRole("button", { name: /submit feedback/i })).toBeInTheDocument();
     });
 
     it("submit button is disabled when no thumbs selection has been made", () => {
-      renderFeedback();
       expect(screen.getByRole("button", { name: /submit feedback/i })).toBeDisabled();
     });
 
     it("thumbs up button has aria-pressed set to false initially", () => {
-      renderFeedback();
       const buttons = screen.getAllByRole("button");
       const thumbsUpBtn = buttons.find((b) => b.querySelector("[data-testid='icon-thumbs-up']"));
       expect(thumbsUpBtn).toHaveAttribute("aria-pressed", "false");
     });
 
     it("thumbs down button has aria-pressed set to false initially", () => {
-      renderFeedback();
       const buttons = screen.getAllByRole("button");
       const thumbsDownBtn = buttons.find((b) =>
         b.querySelector("[data-testid='icon-thumbs-down']"),
@@ -134,34 +130,33 @@ describe("Feedback", () => {
   // Thumbs up / down selection
   // -------------------------------------------------------------------------
   describe("thumbs up / down selection", () => {
-    it("enables the submit button after thumbs up is clicked", async () => {
+    beforeEach(() => {
       renderFeedback();
+    });
+
+    it("enables the submit button after thumbs up is clicked", async () => {
       await userEvent.click(getThumbsUpButton());
       expect(screen.getByRole("button", { name: /submit feedback/i })).not.toBeDisabled();
     });
 
     it("enables the submit button after thumbs down is clicked", async () => {
-      renderFeedback();
       await userEvent.click(getThumbsDownButton());
       expect(screen.getByRole("button", { name: /submit feedback/i })).not.toBeDisabled();
     });
 
     it("sets aria-pressed to true on thumbs up after clicking it", async () => {
-      renderFeedback();
       const btn = getThumbsUpButton();
       await userEvent.click(btn);
       expect(btn).toHaveAttribute("aria-pressed", "true");
     });
 
     it("sets aria-pressed to true on thumbs down after clicking it", async () => {
-      renderFeedback();
       const btn = getThumbsDownButton();
       await userEvent.click(btn);
       expect(btn).toHaveAttribute("aria-pressed", "true");
     });
 
     it("logs feedback_thumbs_up analytics event on thumbs up click", async () => {
-      renderFeedback();
       await userEvent.click(getThumbsUpButton());
       expect(mockAnalytics.logEvent).toHaveBeenCalledWith(
         "feedback_thumbs_up",
@@ -170,7 +165,6 @@ describe("Feedback", () => {
     });
 
     it("logs feedback_thumbs_down analytics event on thumbs down click", async () => {
-      renderFeedback();
       await userEvent.click(getThumbsDownButton());
       expect(mockAnalytics.logEvent).toHaveBeenCalledWith(
         "feedback_thumbs_down",
@@ -313,35 +307,42 @@ describe("Feedback", () => {
   // -------------------------------------------------------------------------
   // Submission — failure
   // -------------------------------------------------------------------------
-  describe("failed submission", () => {
-    it("shows an error toast when the API returns a non-ok response", async () => {
-      mockFetch.mockResolvedValue({ ok: false } as Response);
-      const toast = await import("react-hot-toast");
-      renderFeedback();
-      await userEvent.click(getThumbsUpButton());
-      await userEvent.click(screen.getByRole("button", { name: /submit feedback/i }));
-      await waitFor(() => expect(toast.default.error).toHaveBeenCalledTimes(1));
-    });
+  it("shows an error toast when the API returns a non-ok response", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    mockFetch.mockResolvedValue({ ok: false } as Response);
+    const toast = await import("react-hot-toast");
+    renderFeedback();
+    await userEvent.click(getThumbsUpButton());
+    await userEvent.click(screen.getByRole("button", { name: /submit feedback/i }));
+    await waitFor(() => expect(toast.default.error).toHaveBeenCalledTimes(1));
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
 
-    it("does not render the confirmation view when submission fails", async () => {
-      mockFetch.mockResolvedValue({ ok: false } as Response);
-      renderFeedback();
-      await userEvent.click(getThumbsUpButton());
-      await userEvent.click(screen.getByRole("button", { name: /submit feedback/i }));
-      await waitFor(() =>
-        expect(screen.queryByText(/thank you for your feedback/i)).not.toBeInTheDocument(),
-      );
-    });
+  it("does not render the confirmation view when submission fails", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    mockFetch.mockResolvedValue({ ok: false } as Response);
+    renderFeedback();
+    await userEvent.click(getThumbsUpButton());
+    await userEvent.click(screen.getByRole("button", { name: /submit feedback/i }));
+    await waitFor(() =>
+      expect(screen.queryByText(/thank you for your feedback/i)).not.toBeInTheDocument(),
+    );
+    await act(async () => {});
+    errorSpy.mockRestore();
+  });
 
-    it("re-enables the submit button after a failed submission", async () => {
-      mockFetch.mockResolvedValue({ ok: false } as Response);
-      renderFeedback();
-      await userEvent.click(getThumbsUpButton());
-      await userEvent.click(screen.getByRole("button", { name: /submit feedback/i }));
-      await waitFor(() =>
-        expect(screen.getByRole("button", { name: /submit feedback/i })).not.toBeDisabled(),
-      );
-    });
+  it("re-enables the submit button after a failed submission", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    mockFetch.mockResolvedValue({ ok: false } as Response);
+    renderFeedback();
+    await userEvent.click(getThumbsUpButton());
+    await userEvent.click(screen.getByRole("button", { name: /submit feedback/i }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /submit feedback/i })).not.toBeDisabled(),
+    );
+    await act(async () => {});
+    errorSpy.mockRestore();
   });
 
   // -------------------------------------------------------------------------
