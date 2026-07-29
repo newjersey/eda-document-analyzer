@@ -33,7 +33,7 @@ export function detectDocumentType(filename: string): DetectionResult {
     // This prevents matching "formation" in the prefix itself
     const prefixIndex = normalizedFilename.indexOf("formation document");
     const afterPrefix = normalizedFilename.substring(prefixIndex + "formation document".length);
-    
+
     // Check for specific keywords only in the part after the prefix
     if (afterPrefix.includes("operating")) {
       return {
@@ -42,7 +42,7 @@ export function detectDocumentType(filename: string): DetectionResult {
         confidence: "high"
       };
     }
-    
+
     if (afterPrefix.includes("authority")) {
       return {
         detectedCategory: "formation",
@@ -50,7 +50,7 @@ export function detectDocumentType(filename: string): DetectionResult {
         confidence: "high"
       };
     }
-    
+
     // Check for "formation" keyword only after the prefix
     // Example: "Formation Document_Certificate of Formation.pdf" should match
     if (afterPrefix.includes("formation")) {
@@ -95,7 +95,7 @@ export function detectDocumentType(filename: string): DetectionResult {
   };
 }
 
-interface DocumentType {
+export interface DocumentType {
   value: string;
   label: string;
 }
@@ -126,15 +126,15 @@ export function getAvailableDocumentTypes(detectedCategory: string): DocumentTyp
   switch (detectedCategory) {
     case "tax-clearance":
       // Show only 2 tax clearance options
-      return ALL_DOCUMENT_TYPES.filter(type => 
-        type.value === "tax-clearance-online" || 
+      return ALL_DOCUMENT_TYPES.filter(type =>
+        type.value === "tax-clearance-online" ||
         type.value === "tax-clearance-manual"
       );
 
     case "formation":
       // Show all non-tax-clearance options (9 formation document types)
-      return ALL_DOCUMENT_TYPES.filter(type => 
-        type.value !== "tax-clearance-online" && 
+      return ALL_DOCUMENT_TYPES.filter(type =>
+        type.value !== "tax-clearance-online" &&
         type.value !== "tax-clearance-manual"
       );
 

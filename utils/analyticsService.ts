@@ -62,18 +62,32 @@ type EventMetaData = TabHiddenEventMetaData
 // Validation types
 // ---------------------------------------------------------------------------
 
-interface DocumentResult {
-  error?: string;
+export interface DocumentResult {
+  organizationNameMatches?: boolean;
+  error?: string | boolean;
   success?: boolean;
   passedChecks?: string[];
   missingElements?: string[];
+  message: string;
+  documentInfo?: DocumentInfo;
+  suggestedActions?: string[]
 }
 
-interface ValidatedDocument {
+interface DocumentInfo {
+    pageCount: number;
+    wordCount: number;
+    containsHandwriting: boolean;
+    detectedOrganizationName: boolean;
+    documentType: string;
+}
+
+export interface ValidatedDocument {
   file: File;
+  id: string;
   type: string;
   detectedCategory?: string;
   result?: DocumentResult;
+  projectNumber?: string;
 }
 
 interface FormFields {
@@ -81,7 +95,7 @@ interface FormFields {
   fein?: string;
 }
 
-interface DocumentDetail {
+export interface DocumentDetail {
   fileName: string;
   documentType: string;
   detectedCategory: string | null;
@@ -287,6 +301,10 @@ class AnalyticsService {
             // Reset activity timer
             this.resetActivityTimer();
         }
+    }
+
+    getSessionId() {
+        return this.sessionId;
     }
 
     /**
