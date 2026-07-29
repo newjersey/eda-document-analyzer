@@ -35,7 +35,7 @@ immediately-invoked async function expression
 `(async () => { try { await main(); } catch (err) { ... } })()` is the idiomatic form; `.then()` and
 `.catch()` remain prohibited in all other contexts.
 
-TypeScript source files use the `.ts` extension. The `.js` extension appears only in compiled
+TypeScript source files use the `.ts` and `.tsx` extensions. The `.js` extension appears only in compiled
 output. File extensions must be consistent and unambiguous so that tooling and contributors always
 know what they are looking at.
 
