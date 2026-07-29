@@ -6,6 +6,7 @@ This commit resolves {replace with ticket link placeholder}
 
 - Explain the implementation goals being solved or the feature with the reviewer in mind
 - Mention any relevant issues, insights, or alternatives considered to be shared with the reviewer.
+- Note any architecture, tooling, or development workflow updates in the project README and other documentation files.
 
 ## Accessibility
 
