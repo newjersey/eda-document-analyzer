@@ -48,7 +48,7 @@ jobs:
       # Uses: https://github.com/davelosert/vitest-coverage-report-action
       - name: Report coverage on PR
         if: always()
-        uses: davelosert/vitest-coverage-report-action@v2.12.2
+        uses: davelosert/vitest-coverage-report-action@v2.13.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           json-summary-path: coverage/coverage-summary.json
