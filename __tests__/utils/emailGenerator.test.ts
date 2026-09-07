@@ -19,8 +19,11 @@ vi.mock("../../utils/messageMappings", () => ({
 
 function makeFailedDocument(overrides = {}) {
   return {
+    file: { name: "invoice.pdf" } as File,
+    id: "0",
     type: "tax-clearance-online",
     result: {
+      message: "test",
       success: false,
       missingElements: ["Valid Tax Clearance Required"],
     },
@@ -30,8 +33,11 @@ function makeFailedDocument(overrides = {}) {
 
 function makePassedDocument(overrides = {}) {
   return {
+    file: { name: "invoice.pdf" } as File,
+    id: "0",
     type: "cert-formation",
     result: {
+      message: "test",
       success: true,
       missingElements: [],
     },
@@ -78,7 +84,7 @@ describe("emailGenerator", () => {
       });
 
       it("returns null when result is undefined", () => {
-        const docs = [{ type: "tax-clearance-online", result: undefined }];
+        const docs = [makeFailedDocument({ type: "tax-clearance-online", result: undefined })];
         expect(generateEmailForAllDocuments(docs)).toBeNull();
       });
 
@@ -232,19 +238,25 @@ describe("emailGenerator", () => {
   describe("extractProjectNumber()", () => {
     it("returns the project number from the first document that has one", () => {
       const docs = [
-        { type: "cert-formation", projectNumber: "00187261" },
-        { type: "bylaws", projectNumber: "99999999" },
+        makePassedDocument({ type: "cert-formation", projectNumber: "00187261" }),
+        makePassedDocument({ type: "bylaws", projectNumber: "99999999" }),
       ];
       expect(extractProjectNumber(docs)).toBe("00187261");
     });
 
     it("skips documents without a projectNumber and returns the first match", () => {
-      const docs = [{ type: "cert-formation" }, { type: "bylaws", projectNumber: "00187261" }];
+      const docs = [
+        makePassedDocument({ type: "cert-formation" }),
+        makePassedDocument({ type: "bylaws", projectNumber: "00187261" }),
+      ];
       expect(extractProjectNumber(docs)).toBe("00187261");
     });
 
     it("returns null when no document has a projectNumber", () => {
-      const docs = [{ type: "cert-formation" }, { type: "bylaws" }];
+      const docs = [
+        makePassedDocument({ type: "cert-formation" }),
+        makePassedDocument({ type: "bylaws" }),
+      ];
       expect(extractProjectNumber(docs)).toBeNull();
     });
 
@@ -253,7 +265,7 @@ describe("emailGenerator", () => {
     });
 
     it("returns the project number when only one document exists", () => {
-      const docs = [{ type: "bylaws", projectNumber: "12345678" }];
+      const docs = [makePassedDocument({ type: "bylaws", projectNumber: "12345678" })];
       expect(extractProjectNumber(docs)).toBe("12345678");
     });
   });

@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { Mock, Procedure } from "@vitest/spy";
 import GuidanceContent from "../../components/GuidanceContent";
 
 // ---------------------------------------------------------------------------
@@ -218,7 +217,7 @@ describe("GuidanceContent", () => {
   // View Sample buttons — interactions
   // -------------------------------------------------------------------------
   describe("View Sample buttons — interactions", () => {
-    let onViewSample: Mock<Procedure>;
+    let onViewSample = vi.fn();
     beforeEach(() => {
       onViewSample = vi.fn();
       renderGuidance({ onViewSample });

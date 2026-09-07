@@ -97,7 +97,7 @@ const defaultProps = {
 };
 
 function renderUploadArea(overrides = {}) {
-  return render(<FileUploadArea {...defaultProps} {...overrides} />);
+  return render(<FileUploadArea documentTypes={[]} {...defaultProps} {...overrides} />);
 }
 
 function makeDropEvent(files: File[]) {
