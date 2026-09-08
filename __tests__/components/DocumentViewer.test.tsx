@@ -279,7 +279,8 @@ describe("DocumentViewer", () => {
       renderViewer(makeTextFile(), { zoomLevel: 1.5 });
       await waitFor(() => {
         const zoomDiv = document.querySelector("pre")?.parentElement;
-        expect(zoomDiv).toHaveStyle({ fontSize: "1.5rem" });
+        // 24px = 16px * 1.5
+        expect(zoomDiv).toHaveStyle({ "font-size": "24px" });
       });
     });
   });
@@ -337,7 +338,8 @@ describe("DocumentViewer", () => {
       renderViewer(makeDocxFile(), { zoomLevel: 2 });
       await waitFor(() => {
         const proseDiv = document.querySelector(".prose");
-        expect(proseDiv).toHaveStyle({ fontSize: "2rem" });
+        // 32px = 16px * 2
+        expect(proseDiv).toHaveStyle({ "font-size": "32px" });
       });
     });
   });
