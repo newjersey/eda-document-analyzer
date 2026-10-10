@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v7.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7.0.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version: lts/*
           cache: npm
@@ -48,7 +48,7 @@ jobs:
       # the job is marked red.
       - name: Upload Playwright HTML report
         if: always()
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: playwright-report
           path: playwright-report/
@@ -58,7 +58,7 @@ jobs:
       # Uses: https://github.com/daun/playwright-report-summary
       - name: Post Playwright results to PR
         if: always()
-        uses: daun/playwright-report-summary@v4.1.0
+        uses: daun/playwright-report-summary@v4.1.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           report-file: results.json
