@@ -23,7 +23,7 @@ jobs:
       # package.json / biome.json. Pin to "latest" to always use the newest
       # release, or pin to a semver string for reproducibility.
       - name: Setup Biome
-        uses: biomejs/setup-biome@v2.7.1
+        uses: biomejs/setup-biome@v2.8.0
         with:
           version: latest
 
